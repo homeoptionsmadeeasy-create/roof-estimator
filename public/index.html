@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Instant Roof Estimate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" />
+  <link rel="stylesheet" href="widget.css" />
+</head>
+<body>
+  <main class="rq" id="rq">
+    <div class="rq-topbar" id="trust-bar"></div>
+
+    <div class="rq-body">
+      <header class="rq-head">
+        <div class="brand">
+          <img id="logo" class="rq-logo" alt="" hidden />
+          <span id="wordmark" class="wordmark"></span>
+          <a id="head-phone" class="head-phone"></a>
+        </div>
+        <h1><span id="headline">Your real roof price,</span> <em id="headline-accent">in 60 seconds</em></h1>
+        <p id="subheadline" class="lede"></p>
+        <ol class="rq-steps" aria-label="Progress">
+          <li data-s="1">Address</li><li data-s="2">Your roof</li><li data-s="3">Details</li><li data-s="4">Price</li>
+        </ol>
+      </header>
+
+      <!-- Step 1: address -->
+      <section class="step" data-step="address">
+        <form id="f-address" autocomplete="on">
+          <label for="address" class="lbl">Property address</label>
+          <div class="addr">
+            <svg class="pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>
+            <input id="address" name="address" placeholder="1234 Main St, Fenton, MO 63026" autocomplete="street-address" required />
+            <button type="submit" class="btn">Measure my roof →</button>
+          </div>
+          <p class="err" id="err-address" role="alert"></p>
+        </form>
+        <ul class="how">
+          <li><b>1</b><span><strong>We find your roof</strong>Satellite imagery measures every roof plane and its pitch.</span></li>
+          <li><b>2</b><span><strong>You pick a roof</strong>Answer 5 quick questions about the job.</span></li>
+          <li><b>3</b><span><strong>See your price</strong>A real range based on our pricing, instantly.</span></li>
+        </ul>
+      </section>
+
+      <!-- Loading -->
+      <section class="step" data-step="loading">
+        <div class="loading">
+          <div class="spinner" aria-hidden="true"></div>
+          <p><strong>Measuring your roof from above…</strong><br><span class="muted" id="loading-msg">Locating the property</span></p>
+        </div>
+      </section>
+
+      <!-- Step 2: confirm roof -->
+      <section class="step" data-step="confirm">
+        <h2>Is this your home?</h2>
+        <p class="muted" id="confirm-address"></p>
+        <div class="roof-img"><img id="roof-img" alt="Satellite view of the roof with each measured roof plane outlined" /></div>
+        <div class="stats">
+          <div><b id="s-area">–</b><span>sq ft of roof</span></div>
+          <div><b id="s-facets">–</b><span>roof planes</span></div>
+          <div><b id="s-pitch">–</b><span>main pitch</span></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="yes-roof">Yes, that's my roof</button>
+          <button class="btn ghost" id="no-roof">No / not quite</button>
+        </div>
+      </section>
+
+      <!-- Step 2b: no coverage -->
+      <section class="step" data-step="nocoverage">
+        <h2>We'll measure this one by hand</h2>
+        <p class="muted">Satellite measurements aren't available for this address (or it wasn't quite right). Answer a few quick questions and our estimator will send your price within 1 business day.</p>
+        <button class="btn" id="nocov-continue">Continue →</button>
+      </section>
+
+      <!-- Step 3: questions -->
+      <section class="step" data-step="questions">
+        <form id="f-questions">
+          <fieldset>
+            <legend>Which roof are you interested in?</legend>
+            <div class="cards" id="materials"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>How many layers of old roofing need removed?</legend>
+            <div class="pills">
+              <label><input type="radio" name="layers" value="1" checked><span>1</span></label>
+              <label><input type="radio" name="layers" value="2"><span>2</span></label>
+              <label><input type="radio" name="layers" value="3"><span>3+</span></label>
+              <label><input type="radio" name="layers" value="unknown"><span>Not sure</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>How many stories is the home?</legend>
+            <div class="pills">
+              <label><input type="radio" name="stories" value="1" checked><span>1</span></label>
+              <label><input type="radio" name="stories" value="2"><span>2</span></label>
+              <label><input type="radio" name="stories" value="3"><span>3+</span></label>
+            </div>
+          </fieldset>
+
+          <div class="two">
+            <label class="lbl">Skylights <input type="number" name="skylights" min="0" max="20" value="0"></label>
+            <label class="lbl">Chimneys <input type="number" name="chimneys" min="0" max="10" value="0"></label>
+          </div>
+
+          <div class="two">
+            <label class="lbl">Why are you replacing?
+              <select name="reason">
+                <option>Roof is getting old</option>
+                <option>Leak or active damage</option>
+                <option>Storm / hail damage (insurance)</option>
+                <option>Selling or buying a home</option>
+                <option>Upgrading the look</option>
+              </select>
+            </label>
+            <label class="lbl">When are you hoping to start?
+              <select name="timeline">
+                <option>As soon as possible</option>
+                <option>Within 1–3 months</option>
+                <option>3–6 months</option>
+                <option>Just researching</option>
+              </select>
+            </label>
+          </div>
+          <label class="check" id="fin-wrap"><input type="checkbox" name="financing"> I'm interested in monthly payment options</label>
+
+          <div class="actions">
+            <button type="button" class="btn ghost" data-back="address">← Back</button>
+            <button type="submit" class="btn grow">See my estimate →</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Step 4: contact -->
+      <section class="step" data-step="contact">
+        <div class="ready">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><h2 id="contact-title">Your estimate is ready</h2>
+          <p class="muted" id="contact-sub">Where should we send your detailed estimate?</p></div>
+        </div>
+        <form id="f-contact">
+          <div class="two">
+            <label class="lbl">First name <input name="firstName" autocomplete="given-name" required></label>
+            <label class="lbl">Last name <input name="lastName" autocomplete="family-name"></label>
+          </div>
+          <div class="two">
+            <label class="lbl">Email <input name="email" type="email" autocomplete="email" required></label>
+            <label class="lbl">Mobile phone <input name="phone" type="tel" autocomplete="tel" required></label>
+          </div>
+          <label class="lbl">Anything we should know? <textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <label class="check small"><input type="checkbox" name="consent" required> <span id="consent-text"></span></label>
+          <p class="err" id="err-contact" role="alert"></p>
+          <button type="submit" class="btn wide" id="contact-btn">Show my price →</button>
+          <p class="privacy">🔒 We never sell your information.</p>
+        </form>
+      </section>
+
+      <!-- Step 5: result -->
+      <section class="step" data-step="result">
+        <div id="result-quote">
+          <div class="price-card">
+            <p class="eyebrow" id="r-material"></p>
+            <div class="price" id="r-range"></div>
+            <p class="monthly" id="r-monthly"></p>
+            <p class="detail" id="r-detail"></p>
+          </div>
+          <table class="lines" id="r-lines" hidden></table>
+          <div id="r-compare" class="compare"></div>
+        </div>
+        <div id="result-manual" hidden>
+          <div class="ready">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><h2>Thanks! We're on it.</h2>
+            <p class="muted">Our estimator will measure your roof and send your price within 1 business day.</p></div>
+          </div>
+        </div>
+        <a class="btn wide" id="cta" target="_top"></a>
+        <p class="call">Questions? Call <a id="phone"></a></p>
+        <p class="disclaimer" id="disclaimer"></p>
+        <details class="payload" id="payload" hidden>
+          <summary>Test mode: what would be sent to your CRM</summary>
+          <pre id="payload-json"></pre>
+        </details>
+        <button class="btn ghost wide" id="restart" hidden>Try another address</button>
+      </section>
+    </div>
+
+    <p class="demo" id="demo-banner" hidden></p>
+  </main>
+  <script src="shared.js"></script>
+  <script src="demo-data.js"></script>
+  <script src="widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Instant Roof Estimate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" />
+  <style>
+/* Styled to match homeoptionsllc.net: deep green + orange, Playfair Display headings, system sans body. */
+:root {
+  --brand: #f97316;          /* buttons / highlights (site orange) */
+  --brand-dark: #ea6c0a;
+  --accent: #14532d;         /* deep green */
+  --accent-2: #166534;
+  --accent-soft: #f0fdf4;
+  --accent-line: #dcfce7;
+  --ink: #111827; --ink-2: #374151; --muted: #6b7280; --line: #e5e7eb; --soft: #f9fafb;
+  --r: 6px; --rl: 12px;
+  --serif: "Playfair Display", Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: transparent; }
+body { font: 16px/1.55 var(--sans); color: var(--ink); padding: 8px; }
+.rq { max-width: 760px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: var(--rl); overflow: hidden; box-shadow: var(--shadow); }
+
+/* top trust bar – mirrors the site's green utility bar */
+.rq-topbar { background: var(--accent); color: #fff; font-size: .8rem; font-weight: 600; padding: 9px 24px; display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.rq-topbar span::before { content: "✓"; color: #4ade80; margin-right: 6px; font-weight: 800; }
+.rq-topbar:empty { display: none; }
+.rq-body { padding: 26px 32px 30px; }
+
+/* header */
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.rq-logo { max-height: 46px; max-width: 220px; display: block; }
+.wordmark { font: 700 1.1rem/1.1 var(--serif); color: var(--accent); }
+.head-phone { font-weight: 800; color: var(--accent); text-decoration: none; font-size: .95rem; white-space: nowrap; }
+.head-phone::before { content: "☎ "; color: var(--brand); }
+h1 { font: 700 2.05rem/1.15 var(--serif); letter-spacing: -.02em; margin: 0 0 8px; color: var(--ink); }
+h1 em { font-style: normal; color: var(--brand); }
+h2 { font: 700 1.45rem/1.2 var(--serif); letter-spacing: -.01em; margin: 0 0 4px; }
+.lede { color: var(--ink-2); margin: 0 0 20px; max-width: 58ch; }
+.muted { color: var(--muted); margin: 0 0 16px; }
+
+/* step indicator */
+.rq-steps { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0; margin: 0 0 26px; counter-reset: s; }
+.rq-steps li { counter-increment: s; font-size: .76rem; font-weight: 600; color: var(--muted); padding-top: 9px; border-top: 4px solid var(--line); transition: border-color .25s, color .25s; }
+.rq-steps li::before { content: counter(s) ". "; }
+.rq-steps li.done { border-color: var(--accent-2); color: var(--accent-2); }
+.rq-steps li.now { border-color: var(--brand); color: var(--ink); }
+
+.step { display: none; animation: fade .25s ease; }
+.step.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* form controls */
+.lbl { display: block; font-weight: 600; font-size: .9rem; color: var(--ink-2); margin-bottom: 14px; }
+input, select, textarea { width: 100%; font: inherit; padding: 11px 13px; border: 1.5px solid #d1d5db; border-radius: var(--r); margin-top: 6px; background: #fff; color: var(--ink); transition: border-color .2s, box-shadow .2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-line); }
+.addr { position: relative; display: flex; gap: 10px; margin-top: 6px; }
+.addr input { margin: 0; padding-left: 40px; font-size: 1.02rem; flex: 1; min-height: 52px; }
+.addr .pin { position: absolute; left: 12px; top: 15px; width: 22px; height: 22px; color: var(--accent-2); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--brand); color: #fff; border: 2px solid transparent; border-radius: var(--r); padding: 13px 22px; font: 700 1rem/1 var(--sans); cursor: pointer; text-decoration: none; box-shadow: 0 2px 8px rgba(249,115,22,.3); transition: background .2s, transform .1s; min-height: 50px; }
+.btn:hover { background: var(--brand-dark); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .6; cursor: wait; }
+.btn.ghost { background: #fff; color: var(--accent); border-color: var(--accent); box-shadow: none; }
+.btn.ghost:hover { background: var(--accent-soft); }
+.btn.wide { width: 100%; margin-top: 10px; }
+.btn.grow { flex: 1; }
+.actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.err { color: #b91c1c; font-size: .9rem; min-height: 1.2em; margin: 6px 0 0; font-weight: 500; }
+
+/* how it works */
+.how { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.how li { display: flex; gap: 10px; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--rl); padding: 14px; font-size: .84rem; color: var(--ink-2); }
+.how b { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: .82rem; }
+.how strong { display: block; color: var(--ink); font-size: .9rem; }
+
+/* loading */
+.loading { text-align: center; padding: 30px 0 20px; }
+.spinner { width: 48px; height: 48px; margin: 0 auto 16px; border-radius: 50%; border: 4px solid var(--accent-line); border-top-color: var(--accent-2); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* roof confirm */
+.roof-img { border-radius: var(--rl); overflow: hidden; background: var(--soft); aspect-ratio: 16/10; border: 1px solid var(--line); }
+.roof-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.stats div { background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--rl); padding: 12px; text-align: center; }
+.stats b { display: block; font: 700 1.5rem/1.2 var(--serif); color: var(--accent); }
+.stats span { color: var(--muted); font-size: .8rem; }
+
+/* question controls */
+fieldset { border: 0; padding: 0; margin: 0 0 20px; }
+legend { font-weight: 700; font-size: .95rem; margin-bottom: 10px; color: var(--ink); }
+.cards { display: grid; gap: 10px; }
+.cards label { margin: 0; cursor: pointer; position: relative; }
+.cards input, .pills input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cards .card { display: block; border: 2px solid var(--line); border-radius: var(--rl); padding: 14px 16px 14px 46px; transition: border-color .15s, background .15s; position: relative; }
+.cards .card::before { content: ""; position: absolute; left: 16px; top: 17px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d1d5db; background: #fff; }
+.cards .card b { display: block; font-size: 1rem; }
+.cards .card small { color: var(--muted); font-size: .85rem; }
+.cards input:checked + .card { border-color: var(--accent-2); background: var(--accent-soft); }
+.cards input:checked + .card::before { border-color: var(--accent-2); background: radial-gradient(var(--accent-2) 45%, #fff 50%); }
+.cards input:focus-visible + .card, .pills input:focus-visible + span { box-shadow: 0 0 0 3px var(--accent-line); }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pills label { margin: 0; position: relative; }
+.pills span { display: inline-block; padding: 9px 20px; border: 2px solid var(--line); border-radius: 999px; font-weight: 600; cursor: pointer; color: var(--ink-2); }
+.pills input:checked + span { border-color: var(--accent-2); background: var(--accent-2); color: #fff; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; margin: 4px 0 8px; }
+.check input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent-2); flex: none; }
+.check.small { font-size: .76rem; color: var(--muted); font-weight: 400; line-height: 1.45; }
+.hp { position: absolute; left: -9999px; }
+
+/* contact */
+.ready { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+.ready svg { flex: none; width: 40px; height: 40px; padding: 8px; border-radius: 50%; background: var(--accent-2); color: #fff; }
+.privacy { text-align: center; font-size: .8rem; color: var(--muted); margin: 10px 0 0; }
+
+/* result */
+.price-card { background: var(--accent); color: #fff; border-radius: var(--rl); padding: 22px 24px; position: relative; overflow: hidden; }
+.price-card::after { content: ""; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%; background: rgba(255,255,255,.05); }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .74rem; color: #bbf7d0; margin: 0; font-weight: 700; }
+.price { font: 700 2.6rem/1.1 var(--serif); letter-spacing: -.02em; margin: 6px 0; }
+.monthly { font-weight: 700; color: #fdba74; margin: 0 0 6px; }
+.detail { color: #dcfce7; font-size: .88rem; margin: 0; }
+.lines { width: 100%; border-collapse: collapse; margin: 14px 0 4px; font-size: .9rem; }
+.lines td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.lines td:last-child { text-align: right; white-space: nowrap; font-weight: 600; }
+.compare { display: grid; gap: 8px; margin: 18px 0 6px; }
+.compare h3 { font: 700 1.05rem var(--serif); margin: 0 0 2px; }
+.compare .opt { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: var(--r); font-size: .95rem; }
+.compare .opt.sel { border-color: var(--accent-2); background: var(--accent-soft); }
+.compare .opt span:last-child { font-weight: 700; white-space: nowrap; color: var(--accent); }
+.call { text-align: center; color: var(--muted); font-size: .92rem; margin: 14px 0 0; }
+.call a { color: var(--accent); font-weight: 800; }
+.disclaimer { font-size: .76rem; color: var(--muted); margin: 14px 0 0; line-height: 1.5; }
+.payload { margin-top: 16px; border: 1px dashed #fdba74; background: #fff7ed; border-radius: var(--r); padding: 10px 12px; font-size: .82rem; }
+.payload summary { cursor: pointer; font-weight: 700; color: #9a3412; }
+.payload pre { white-space: pre-wrap; word-break: break-word; font-size: .74rem; max-height: 320px; overflow: auto; margin: 8px 0 0; }
+.demo { margin: 0; padding: 10px 24px; background: #fff7ed; border-top: 1px solid #fed7aa; font-size: .8rem; color: #9a3412; }
+
+@media (max-width: 600px) {
+  body { padding: 0; }
+  .rq { border-radius: 0; border-left: 0; border-right: 0; box-shadow: none; }
+  .rq-body { padding: 20px 16px 24px; }
+  .rq-topbar { padding: 8px 16px; }
+  h1 { font-size: 1.65rem; }
+  .addr { flex-direction: column; }
+  .addr .btn { width: 100%; }
+  .two, .how { grid-template-columns: 1fr; gap: 0 14px; }
+  .how { gap: 8px; }
+  .price { font-size: 2.1rem; }
+  .head-phone { display: none; }
+}
+
+</style>
+</head>
+<body>
+  <main class="rq" id="rq">
+    <div class="rq-topbar" id="trust-bar"></div>
+
+    <div class="rq-body">
+      <header class="rq-head">
+        <div class="brand">
+          <img id="logo" class="rq-logo" alt="" hidden />
+          <span id="wordmark" class="wordmark"></span>
+          <a id="head-phone" class="head-phone"></a>
+        </div>
+        <h1><span id="headline">Your real roof price,</span> <em id="headline-accent">in 60 seconds</em></h1>
+        <p id="subheadline" class="lede"></p>
+        <ol class="rq-steps" aria-label="Progress">
+          <li data-s="1">Address</li><li data-s="2">Your roof</li><li data-s="3">Details</li><li data-s="4">Price</li>
+        </ol>
+      </header>
+
+      <!-- Step 1: address -->
+      <section class="step" data-step="address">
+        <form id="f-address" autocomplete="on">
+          <label for="address" class="lbl">Property address</label>
+          <div class="addr">
+            <svg class="pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>
+            <input id="address" name="address" placeholder="1234 Main St, Fenton, MO 63026" autocomplete="street-address" required />
+            <button type="submit" class="btn">Measure my roof →</button>
+          </div>
+          <p class="err" id="err-address" role="alert"></p>
+        </form>
+        <ul class="how">
+          <li><b>1</b><span><strong>We find your roof</strong>Satellite imagery measures every roof plane and its pitch.</span></li>
+          <li><b>2</b><span><strong>You pick a roof</strong>Answer 5 quick questions about the job.</span></li>
+          <li><b>3</b><span><strong>See your price</strong>A real range based on our pricing, instantly.</span></li>
+        </ul>
+      </section>
+
+      <!-- Loading -->
+      <section class="step" data-step="loading">
+        <div class="loading">
+          <div class="spinner" aria-hidden="true"></div>
+          <p><strong>Measuring your roof from above…</strong><br><span class="muted" id="loading-msg">Locating the property</span></p>
+        </div>
+      </section>
+
+      <!-- Step 2: confirm roof -->
+      <section class="step" data-step="confirm">
+        <h2>Is this your home?</h2>
+        <p class="muted" id="confirm-address"></p>
+        <div class="roof-img"><img id="roof-img" alt="Satellite view of the roof with each measured roof plane outlined" /></div>
+        <div class="stats">
+          <div><b id="s-area">–</b><span>sq ft of roof</span></div>
+          <div><b id="s-facets">–</b><span>roof planes</span></div>
+          <div><b id="s-pitch">–</b><span>main pitch</span></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="yes-roof">Yes, that's my roof</button>
+          <button class="btn ghost" id="no-roof">No / not quite</button>
+        </div>
+      </section>
+
+      <!-- Step 2b: no coverage -->
+      <section class="step" data-step="nocoverage">
+        <h2>We'll measure this one by hand</h2>
+        <p class="muted">Satellite measurements aren't available for this address (or it wasn't quite right). Answer a few quick questions and our estimator will send your price within 1 business day.</p>
+        <button class="btn" id="nocov-continue">Continue →</button>
+      </section>
+
+      <!-- Step 3: questions -->
+      <section class="step" data-step="questions">
+        <form id="f-questions">
+          <fieldset>
+            <legend>Which roof are you interested in?</legend>
+            <div class="cards" id="materials"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>How many layers of old roofing need removed?</legend>
+            <div class="pills">
+              <label><input type="radio" name="layers" value="1" checked><span>1</span></label>
+              <label><input type="radio" name="layers" value="2"><span>2</span></label>
+              <label><input type="radio" name="layers" value="3"><span>3+</span></label>
+              <label><input type="radio" name="layers" value="unknown"><span>Not sure</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>How many stories is the home?</legend>
+            <div class="pills">
+              <label><input type="radio" name="stories" value="1" checked><span>1</span></label>
+              <label><input type="radio" name="stories" value="2"><span>2</span></label>
+              <label><input type="radio" name="stories" value="3"><span>3+</span></label>
+            </div>
+          </fieldset>
+
+          <div class="two">
+            <label class="lbl">Skylights <input type="number" name="skylights" min="0" max="20" value="0"></label>
+            <label class="lbl">Chimneys <input type="number" name="chimneys" min="0" max="10" value="0"></label>
+          </div>
+
+          <div class="two">
+            <label class="lbl">Why are you replacing?
+              <select name="reason">
+                <option>Roof is getting old</option>
+                <option>Leak or active damage</option>
+                <option>Storm / hail damage (insurance)</option>
+                <option>Selling or buying a home</option>
+                <option>Upgrading the look</option>
+              </select>
+            </label>
+            <label class="lbl">When are you hoping to start?
+              <select name="timeline">
+                <option>As soon as possible</option>
+                <option>Within 1–3 months</option>
+                <option>3–6 months</option>
+                <option>Just researching</option>
+              </select>
+            </label>
+          </div>
+          <label class="check" id="fin-wrap"><input type="checkbox" name="financing"> I'm interested in monthly payment options</label>
+
+          <div class="actions">
+            <button type="button" class="btn ghost" data-back="address">← Back</button>
+            <button type="submit" class="btn grow">See my estimate →</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Step 4: contact -->
+      <section class="step" data-step="contact">
+        <div class="ready">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><h2 id="contact-title">Your estimate is ready</h2>
+          <p class="muted" id="contact-sub">Where should we send your detailed estimate?</p></div>
+        </div>
+        <form id="f-contact">
+          <div class="two">
+            <label class="lbl">First name <input name="firstName" autocomplete="given-name" required></label>
+            <label class="lbl">Last name <input name="lastName" autocomplete="family-name"></label>
+          </div>
+          <div class="two">
+            <label class="lbl">Email <input name="email" type="email" autocomplete="email" required></label>
+            <label class="lbl">Mobile phone <input name="phone" type="tel" autocomplete="tel" required></label>
+          </div>
+          <label class="lbl">Anything we should know? <textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <label class="check small"><input type="checkbox" name="consent" required> <span id="consent-text"></span></label>
+          <p class="err" id="err-contact" role="alert"></p>
+          <button type="submit" class="btn wide" id="contact-btn">Show my price →</button>
+          <p class="privacy">🔒 We never sell your information.</p>
+        </form>
+      </section>
+
+      <!-- Step 5: result -->
+      <section class="step" data-step="result">
+        <div id="result-quote">
+          <div class="price-card">
+            <p class="eyebrow" id="r-material"></p>
+            <div class="price" id="r-range"></div>
+            <p class="monthly" id="r-monthly"></p>
+            <p class="detail" id="r-detail"></p>
+          </div>
+          <table class="lines" id="r-lines" hidden></table>
+          <div id="r-compare" class="compare"></div>
+        </div>
+        <div id="result-manual" hidden>
+          <div class="ready">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><h2>Thanks! We're on it.</h2>
+            <p class="muted">Our estimator will measure your roof and send your price within 1 business day.</p></div>
+          </div>
+        </div>
+        <a class="btn wide" id="cta" target="_top"></a>
+        <p class="call">Questions? Call <a id="phone"></a></p>
+        <p class="disclaimer" id="disclaimer"></p>
+        <details class="payload" id="payload" hidden>
+          <summary>Test mode: what would be sent to your CRM</summary>
+          <pre id="payload-json"></pre>
+        </details>
+        <button class="btn ghost wide" id="restart" hidden>Try another address</button>
+      </section>
+    </div>
+
+    <p class="demo" id="demo-banner" hidden></p>
+  </main>
+  <script>
+// Shared roof math + pricing formula. Runs on the server (require) AND in the browser (window.RQShared),
+// so the demo mode and the live server always calculate exactly the same price.
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.RQShared = factory();
+})(typeof self !== "undefined" ? self : this, function () {
+const SQFT_PER_M2 = 10.7639;
+const riseFromDegrees = (deg) => Math.tan((deg * Math.PI) / 180) * 12;
+
+function haversineM(a, b) {
+  const R = 6371000, toR = (d) => (d * Math.PI) / 180;
+  const dLat = toR(b.lat - a.lat), dLng = toR(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toR(a.lat)) * Math.cos(toR(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+// Turn the raw Solar response into the numbers the pricing formula needs.
+function normalize(insights, geo, measurementCfg = {}) {
+  const sp = insights.solarPotential || {};
+  const minSeg = measurementCfg.minSegmentSqFt ?? 15;
+  const segments = (sp.roofSegmentStats || [])
+    .map((s) => {
+      const areaSqFt = (s.stats?.areaMeters2 || 0) * SQFT_PER_M2;
+      const pitchDeg = s.pitchDegrees || 0;
+      return {
+        areaSqFt,
+        groundSqFt: (s.stats?.groundAreaMeters2 || 0) * SQFT_PER_M2,
+        pitchDeg,
+        pitchRise: riseFromDegrees(pitchDeg),
+        azimuthDeg: s.azimuthDegrees || 0,
+        heightM: s.planeHeightAtCenterMeters || 0,
+        box: s.boundingBox,
+      };
+    })
+    .filter((s) => s.areaSqFt >= minSeg);
+
+  const totalAreaSqFt = segments.reduce((t, s) => t + s.areaSqFt, 0);
+  const groundAreaSqFt = segments.reduce((t, s) => t + s.groundSqFt, 0);
+  // Area-weighted predominant pitch
+  const weightedRise = totalAreaSqFt ? segments.reduce((t, s) => t + s.pitchRise * s.areaSqFt, 0) / totalAreaSqFt : 0;
+  const maxHeight = Math.max(0, ...segments.map((s) => s.heightM));
+  const estStories = maxHeight === 0 ? 1 : maxHeight < 5.5 ? 1 : maxHeight < 8.5 ? 2 : 3;
+
+  const center = { lat: insights.center?.latitude, lng: insights.center?.longitude };
+  const distanceFromAddressM = geo && center.lat ? Math.round(haversineM(geo, center)) : null;
+
+  return {
+    quality: insights.imageryQuality || 'UNKNOWN',
+    imageryDate: insights.imageryDate ? `${insights.imageryDate.year}-${String(insights.imageryDate.month).padStart(2, '0')}` : null,
+    center,
+    boundingBox: insights.boundingBox,
+    distanceFromAddressM,
+    segments,
+    facets: segments.length,
+    totalAreaSqFt: Math.round(totalAreaSqFt),
+    groundAreaSqFt: Math.round(groundAreaSqFt),
+    predominantPitch: `${Math.round(weightedRise)}/12`,
+    predominantRise: weightedRise,
+    estStories,
+  };
+}
+
+// Placeholder image for mock mode (no API key yet)
+function mockSvg(m) {
+  const bb = m.boundingBox;
+  const W = 640, H = 400;
+  const x = (lng) => ((lng - bb.sw.longitude) / (bb.ne.longitude - bb.sw.longitude)) * 420 + 110;
+  const y = (lat) => H - (((lat - bb.sw.latitude) / (bb.ne.latitude - bb.sw.latitude)) * 270 + 70);
+  // Shade each plane by the direction it faces, like sunlight on a real aerial photo
+  const shade = (az) => { const l = 34 + 14 * Math.cos(((az - 160) * Math.PI) / 180); return `hsl(25, 8%, ${l.toFixed(0)}%)`; };
+  const planes = m.segments.slice().sort((a, b) => b.heightM - a.heightM).reverse().map((s) => {
+    const { sw, ne } = s.box;
+    const rx = x(sw.longitude), ry = y(ne.latitude), rw = x(ne.longitude) - rx, rh = y(sw.latitude) - ry;
+    return `<rect x="${rx.toFixed(1)}" y="${ry.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" fill="${shade(s.azimuthDeg)}"/>` +
+      `<rect x="${rx.toFixed(1)}" y="${ry.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" fill="#f9731622" stroke="#f97316" stroke-width="2.5"/>`;
+  }).join('');
+  const trees = [[60, 70, 38], [585, 330, 44], [40, 320, 30], [600, 80, 26]].map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#2f4f2a"/><circle cx="${cx - r / 4}" cy="${cy - r / 4}" r="${r * 0.6}" fill="#3d6334"/>`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">` +
+    `<rect width="${W}" height="${H}" fill="#55704a"/><rect x="0" y="352" width="${W}" height="48" fill="#8a8f8c"/><rect x="300" y="300" width="60" height="60" fill="#b9bcb8"/>` +
+    trees + planes +
+    `<rect x="12" y="12" width="250" height="28" rx="6" fill="#111827cc"/><text x="24" y="31" fill="#fff" font-family="system-ui,sans-serif" font-size="13" font-weight="600">DEMO ROOF · real satellite photo when live</text></svg>`;
+}
+
+const round2 = (n) => Math.round(n * 100) / 100;
+
+function monthlyPayment(principal, aprPercent, months) {
+  const r = aprPercent / 100 / 12;
+  if (!months) return 0;
+  if (r === 0) return principal / months;
+  return (principal * r) / (1 - Math.pow(1 + r, -months));
+}
+
+/**
+ * @param {object} m   normalized measurement (lib/solar.js normalize) – segments, facets, quality
+ * @param {object} a   homeowner answers: { materialId, layers, stories, skylights, chimneys }
+ * @param {object} cfg config.json
+ */
+function computeQuote(m, a, cfg, materialIdOverride) {
+  const material = cfg.materials.find((x) => x.id === (materialIdOverride || a.materialId)) || cfg.materials.find((x) => x.enabled);
+  const lines = [];
+  const add = (label, amount, detail) => { if (amount) lines.push({ label, amount: round2(amount), detail }); };
+
+  const adj = 1 + (cfg.measurement.areaAdjustmentPercent || 0) / 100;
+
+  // --- Area by pitch bucket ---
+  let pitchedSqFt = 0, lowSlopeSqFt = 0;
+  const steepSqFt = cfg.steepPitch.map(() => 0);
+  const tiers = cfg.steepPitch.map((t, i) => ({ ...t, i })).sort((x, y) => y.minRise - x.minRise);
+  for (const s of m.segments) {
+    const area = s.areaSqFt * adj;
+    if (s.pitchRise < cfg.lowSlope.maxRise) { lowSlopeSqFt += area; continue; }
+    pitchedSqFt += area;
+    const tier = tiers.find((t) => s.pitchRise >= t.minRise);
+    if (tier) steepSqFt[tier.i] += area;
+  }
+  const totalSqFt = pitchedSqFt + lowSlopeSqFt;
+
+  // --- Waste ---
+  const w = cfg.waste;
+  const wastePct = Math.min(w.maxPercent, w.basePercent + Math.max(0, m.facets - w.facetThreshold) * w.extraPercentPerFacet);
+  const wasteMult = 1 + wastePct / 100;
+
+  const pitchedSquares = (pitchedSqFt / 100) * wasteMult;
+  const lowSlopeSquares = (lowSlopeSqFt / 100) * wasteMult;
+  const totalSquares = pitchedSquares + lowSlopeSquares;
+
+  add(`${material.name}`, pitchedSquares * material.pricePerSquare, `${pitchedSquares.toFixed(1)} sq × $${material.pricePerSquare} (incl. ${wastePct.toFixed(1)}% waste)`);
+  add(cfg.lowSlope.label, lowSlopeSquares * cfg.lowSlope.pricePerSquare, `${lowSlopeSquares.toFixed(1)} sq × $${cfg.lowSlope.pricePerSquare}`);
+
+  cfg.steepPitch.forEach((t, i) => {
+    const sq = (steepSqFt[i] / 100) * wasteMult;
+    add(t.label, sq * t.extraPerSquare, `${sq.toFixed(1)} sq × $${t.extraPerSquare}`);
+  });
+
+  // --- Stories ---
+  const stories = String(Math.min(3, Math.max(1, parseInt(a.stories, 10) || m.estStories || 1)));
+  const storyRate = cfg.stories[stories] || 0;
+  add(`${stories}-story access`, totalSquares * storyRate, `${totalSquares.toFixed(1)} sq × $${storyRate}`);
+
+  // --- Tear-off ---
+  const layers = a.layers === 'unknown' || a.layers == null || a.layers === '' ? cfg.tearOff.assumeLayersIfUnknown : parseInt(a.layers, 10) || 0;
+  add(`Tear-off (${layers} layer${layers === 1 ? '' : 's'})`, totalSquares * layers * cfg.tearOff.perSquarePerLayer, `${totalSquares.toFixed(1)} sq × ${layers} × $${cfg.tearOff.perSquarePerLayer}`);
+
+  // --- Extras ---
+  const sky = Math.max(0, parseInt(a.skylights, 10) || 0);
+  const chim = Math.max(0, parseInt(a.chimneys, 10) || 0);
+  add(`Skylight flashing/reseal (${sky})`, sky * cfg.extras.perSkylight);
+  add(`Chimney flashing (${chim})`, chim * cfg.extras.perChimney);
+  for (const f of cfg.flatFees) add(f.label, f.amount);
+
+  let subtotal = lines.reduce((t, l) => t + l.amount, 0);
+
+  // --- Complexity ---
+  if (m.facets > cfg.complexity.facetThreshold) {
+    const c = subtotal * (cfg.complexity.extraPercent / 100);
+    add(`Complex roof (${m.facets} planes)`, c);
+    subtotal += c;
+  }
+
+  // --- Minimum ---
+  if (subtotal < cfg.minimumJob) {
+    add('Minimum job adjustment', cfg.minimumJob - subtotal);
+    subtotal = cfg.minimumJob;
+  }
+
+  // --- Range ---
+  const rPct = cfg.rangePercentByQuality[m.quality] ?? cfg.rangePercentByQuality.UNKNOWN ?? 15;
+  const ro = cfg.roundTo || 1;
+  const low = Math.floor((subtotal * (1 - rPct / 100)) / ro) * ro;
+  const high = Math.ceil((subtotal * (1 + rPct / 100)) / ro) * ro;
+
+  const fin = cfg.financing?.enabled
+    ? { monthlyFrom: Math.round(monthlyPayment(low, cfg.financing.aprPercent, cfg.financing.termMonths)), aprPercent: cfg.financing.aprPercent, termMonths: cfg.financing.termMonths }
+    : null;
+
+  return {
+    materialId: material.id,
+    materialName: material.name,
+    roofSqFt: Math.round(totalSqFt),
+    squares: round2(totalSquares),
+    wastePercent: round2(wastePct),
+    stories: Number(stories),
+    layers,
+    lines,
+    mid: Math.round(subtotal),
+    low, high, rangePercent: rPct,
+    financing: fin,
+  };
+}
+
+function quoteAllMaterials(m, a, cfg) {
+  return cfg.materials.filter((x) => x.enabled).map((mat) => computeQuote(m, a, cfg, mat.id));
+}
+
+
+  return { normalize, riseFromDegrees, haversineM, mockSvg, computeQuote, quoteAllMaterials, monthlyPayment };
+});
+
+</script>
+  <script>
+window.RQ_FORCE_LOCAL = true;
+// Generated by scripts/build-demo.js from data/config.default.json – sample roof + pricing for test mode.
+window.RQ_DEMO_DATA = {"config":{"branding":{"companyName":"Home Options Made Easy","primaryColor":"#f97316","accentColor":"#14532d","logoUrl":"https://homeoptionsllc.net/logo_transparent.png","phone":"(636) 333-3346","ctaText":"Schedule my free inspection →","ctaUrl":"https://homeoptionsllc.net/contact.html","headline":"Your real roof price,","headlineAccent":"in 60 seconds","subheadline":"We measure your actual roof from satellite imagery and price it the same way our estimators do. No sales call required.","trustItems":["Licensed & Insured","USMC Veteran Founded","Serving St. Louis Since 2008"],"consentText":"By submitting, I agree to be contacted by phone, text, or email about my estimate. Consent is not a condition of purchase. Msg & data rates may apply.","disclaimer":"This estimate is based on satellite measurements and the answers you provided. Your final price is confirmed after a free on-site inspection (decking, ventilation, and flashing condition can't be seen from above)."},"measurement":{"requiredQuality":"LOW","minSegmentSqFt":15,"areaAdjustmentPercent":5,"maxDistanceFromAddressM":40},"materials":[{"id":"arch-shingle","name":"Architectural Shingles","description":"The most popular choice. 30-year+ dimensional shingles.","pricePerSquare":475,"enabled":true},{"id":"designer-shingle","name":"Designer / Impact-Resistant Shingles","description":"Class 4 impact rating; may lower insurance premiums.","pricePerSquare":625,"enabled":true},{"id":"standing-seam","name":"Standing Seam Metal","description":"50+ year lifespan, energy efficient, premium look.","pricePerSquare":1250,"enabled":true}],"lowSlope":{"maxRise":2,"pricePerSquare":700,"label":"Low-slope / flat section (modified bitumen or TPO)"},"waste":{"basePercent":10,"facetThreshold":6,"extraPercentPerFacet":0.75,"maxPercent":20},"steepPitch":[{"minRise":8,"extraPerSquare":45,"label":"Steep pitch (8/12 to 10/12)"},{"minRise":10,"extraPerSquare":95,"label":"Very steep pitch (10/12+)"}],"stories":{"1":0,"2":20,"3":45},"tearOff":{"perSquarePerLayer":65,"assumeLayersIfUnknown":1},"extras":{"perSkylight":450,"perChimney":375},"flatFees":[{"label":"Permit, dumpster & disposal","amount":650}],"complexity":{"facetThreshold":12,"extraPercent":5},"minimumJob":6500,"rangePercentByQuality":{"HIGH":8,"MEDIUM":12,"LOW":18,"UNKNOWN":20},"roundTo":100,"financing":{"enabled":true,"aprPercent":9.99,"termMonths":144},"display":{"showLineItems":false,"compareAllMaterials":true}},"building":{"name":"buildings/mock","center":{"latitude":32.7767,"longitude":-96.797},"imageryDate":{"year":2025,"month":6,"day":12},"imageryQuality":"HIGH","postalCode":"75201","regionCode":"US","boundingBox":{"sw":{"latitude":32.77652,"longitude":-96.7972376},"ne":{"latitude":32.776807999999996,"longitude":-96.79666519999999}},"solarPotential":{"wholeRoofStats":{"areaMeters2":230.3},"roofSegmentStats":[{"pitchDegrees":26.6,"azimuthDegrees":180,"stats":{"areaMeters2":62.4,"groundAreaMeters2":55.8,"sunshineQuantiles":[]},"center":{"latitude":32.776655,"longitude":-96.797},"boundingBox":{"sw":{"latitude":32.77661,"longitude":-96.7971512},"ne":{"latitude":32.7767,"longitude":-96.79684879999999}},"planeHeightAtCenterMeters":6.1},{"pitchDegrees":26.6,"azimuthDegrees":0,"stats":{"areaMeters2":61.8,"groundAreaMeters2":55.26,"sunshineQuantiles":[]},"center":{"latitude":32.776745,"longitude":-96.797},"boundingBox":{"sw":{"latitude":32.7767,"longitude":-96.7971512},"ne":{"latitude":32.77679,"longitude":-96.79684879999999}},"planeHeightAtCenterMeters":6.1},{"pitchDegrees":26.6,"azimuthDegrees":90,"stats":{"areaMeters2":24.5,"groundAreaMeters2":21.91,"sunshineQuantiles":[]},"center":{"latitude":32.7767,"longitude":-96.7968164},"boundingBox":{"sw":{"latitude":32.77661,"longitude":-96.79684879999999},"ne":{"latitude":32.77679,"longitude":-96.796784}},"planeHeightAtCenterMeters":5.9},{"pitchDegrees":26.6,"azimuthDegrees":270,"stats":{"areaMeters2":24.1,"groundAreaMeters2":21.55,"sunshineQuantiles":[]},"center":{"latitude":32.7767,"longitude":-96.7971836},"boundingBox":{"sw":{"latitude":32.77661,"longitude":-96.79721599999999},"ne":{"latitude":32.77679,"longitude":-96.7971512}},"planeHeightAtCenterMeters":5.9},{"pitchDegrees":33.7,"azimuthDegrees":180,"stats":{"areaMeters2":18.2,"groundAreaMeters2":15.14,"sunshineQuantiles":[]},"center":{"latitude":32.776574,"longitude":-96.797},"boundingBox":{"sw":{"latitude":32.776537999999995,"longitude":-96.7970648},"ne":{"latitude":32.77661,"longitude":-96.7969352}},"planeHeightAtCenterMeters":5.2},{"pitchDegrees":33.7,"azimuthDegrees":90,"stats":{"areaMeters2":7.4,"groundAreaMeters2":6.16,"sunshineQuantiles":[]},"center":{"latitude":32.776574,"longitude":-96.796919},"boundingBox":{"sw":{"latitude":32.776537999999995,"longitude":-96.7969352},"ne":{"latitude":32.77661,"longitude":-96.7969028}},"planeHeightAtCenterMeters":5},{"pitchDegrees":33.7,"azimuthDegrees":270,"stats":{"areaMeters2":7.2,"groundAreaMeters2":5.99,"sunshineQuantiles":[]},"center":{"latitude":32.776574,"longitude":-96.79708099999999},"boundingBox":{"sw":{"latitude":32.776537999999995,"longitude":-96.7970972},"ne":{"latitude":32.77661,"longitude":-96.7970648}},"planeHeightAtCenterMeters":5},{"pitchDegrees":18.4,"azimuthDegrees":180,"stats":{"areaMeters2":21.6,"groundAreaMeters2":20.5,"sunshineQuantiles":[]},"center":{"latitude":32.776709,"longitude":-96.7967354},"boundingBox":{"sw":{"latitude":32.776664,"longitude":-96.796784},"ne":{"latitude":32.776754,"longitude":-96.7966868}},"planeHeightAtCenterMeters":3.4},{"pitchDegrees":4,"azimuthDegrees":0,"stats":{"areaMeters2":3.1,"groundAreaMeters2":3.09,"sunshineQuantiles":[]},"center":{"latitude":32.776771999999994,"longitude":-96.7967624},"boundingBox":{"sw":{"latitude":32.776754,"longitude":-96.796784},"ne":{"latitude":32.77679,"longitude":-96.7967408}},"planeHeightAtCenterMeters":3}]}}};
+</script>
+  <script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const S = window.RQShared;
+  const state = { cfg: null, mode: 'server', sessionId: null, found: false, confirmed: true, roof: null, answers: {} };
+  const stepNo = { address: 1, loading: 1, confirm: 2, nocoverage: 2, questions: 3, contact: 4, result: 5 };
+  const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ------------------------------------------------------------------
+  // API layer. "server" mode talks to server.js. "local" mode runs the exact
+  // same formula in the browser with a sample roof, so the page works when
+  // opened straight from a folder or as a hosted preview, with no setup.
+  // ------------------------------------------------------------------
+  async function post(url, body) {
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+    return data;
+  }
+
+  const local = {
+    sessions: {},
+    publicConfig() {
+      const c = window.RQ_DEMO_DATA.config;
+      return {
+        branding: c.branding,
+        materials: c.materials.filter((m) => m.enabled).map(({ id, name, description }) => ({ id, name, description })),
+        financing: !!c.financing?.enabled, showLineItems: !!c.display?.showLineItems, demo: true,
+      };
+    },
+    async measure(address) {
+      if (address.length < 6) throw new Error('Please enter your full street address.');
+      const c = window.RQ_DEMO_DATA.config;
+      const m = S.normalize(window.RQ_DEMO_DATA.building, null, c.measurement);
+      const id = Math.random().toString(36).slice(2);
+      const parts = address.split(',').map((p) => p.trim());
+      const stZip = (parts[2] || '').split(/\s+/);
+      this.sessions[id] = { measurement: m, address: { full: address, street: parts[0] || address, city: parts[1] || '', state: stZip[0] || '', zip: stZip[1] || '' } };
+      await new Promise((r) => setTimeout(r, 900));
+      return {
+        sessionId: id, found: true, address,
+        roof: { totalAreaSqFt: m.totalAreaSqFt, facets: m.facets, predominantPitch: m.predominantPitch, estStories: m.estStories, quality: m.quality },
+        imageUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(S.mockSvg(m)),
+      };
+    },
+    async lead(b) {
+      const c = window.RQ_DEMO_DATA.config;
+      const s = this.sessions[b.sessionId];
+      const ct = b.contact;
+      if (!ct.firstName || !/^\S+@\S+\.\S+$/.test(ct.email) || String(ct.phone).replace(/\D/g, '').length < 10) {
+        throw new Error('Please enter your name, a valid email, and a 10-digit phone number.');
+      }
+      if (!b.consent) throw new Error('Please check the consent box to receive your estimate.');
+      const m = s.measurement, use = b.confirmed !== false;
+      const quote = use ? S.computeQuote(m, b.answers, c) : null;
+      const comparisons = use && c.display?.compareAllMaterials ? S.quoteAllMaterials(m, b.answers, c) : [];
+      const testLead = {
+        createdAt: new Date().toISOString(), firstName: ct.firstName, lastName: ct.lastName, email: ct.email, phone: ct.phone,
+        address: s.address, answers: b.answers, notes: b.notes,
+        roof: { totalAreaSqFt: m.totalAreaSqFt, facets: m.facets, predominantPitch: m.predominantPitch, quality: m.quality, imageryDate: m.imageryDate },
+        quote: quote && { low: quote.low, high: quote.high, mid: quote.mid, squares: quote.squares, materialName: quote.materialName, lines: quote.lines },
+        needsManualMeasure: !use, utm: b.utm,
+      };
+      return {
+        quote: quote && (c.display?.showLineItems ? quote : { ...quote, lines: undefined }),
+        comparisons: comparisons.map((q) => ({ materialId: q.materialId, materialName: q.materialName, low: q.low, high: q.high })),
+        needsManualMeasure: !use, testLead,
+      };
+    },
+  };
+
+  const api = {
+    publicConfig: () => (state.mode === 'local' ? local.publicConfig() : fetch('api/public-config').then((r) => { if (!r.ok) throw 0; return r.json(); })),
+    measure: (address) => (state.mode === 'local' ? local.measure(address) : post('api/measure', { address })),
+    lead: (body) => (state.mode === 'local' ? local.lead(body) : post('api/lead', body)),
+  };
+
+  // ------------------------------------------------------------------
+  function show(step) {
+    document.querySelectorAll('.step').forEach((el) => el.classList.toggle('active', el.dataset.step === step));
+    const n = stepNo[step];
+    document.querySelectorAll('.rq-steps li').forEach((li) => {
+      const i = Number(li.dataset.s);
+      li.className = i < n ? 'done' : i === n ? 'now' : '';
+    });
+    if (step !== 'address') {
+      const first = document.querySelector(`.step[data-step="${step}"] h2, .step[data-step="${step}"] button`);
+      if (first) { first.setAttribute('tabindex', '-1'); first.focus({ preventScroll: true }); }
+    }
+    if (window.parent !== window) document.querySelector('.rq').scrollIntoView({ block: 'nearest' });
+    resize();
+  }
+  function resize() {
+    if (window.parent !== window) window.parent.postMessage({ type: 'roof-quote:height', height: document.documentElement.scrollHeight }, '*');
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(document.body);
+
+  function utm() {
+    const p = new URLSearchParams(location.search), out = {};
+    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid']) if (p.get(k)) out[k] = p.get(k);
+    return out;
+  }
+
+  async function init() {
+    let cfg;
+    if (location.protocol === 'file:' || window.RQ_FORCE_LOCAL) state.mode = 'local';
+    try { cfg = await api.publicConfig(); }
+    catch { state.mode = 'local'; cfg = await api.publicConfig(); }
+    state.cfg = cfg;
+
+    const b = cfg.branding;
+    const root = document.documentElement.style;
+    if (b.primaryColor) root.setProperty('--brand', b.primaryColor);
+    if (b.accentColor) { root.setProperty('--accent', b.accentColor); }
+    $('#headline').textContent = b.headline || '';
+    $('#headline-accent').textContent = b.headlineAccent || '';
+    $('#subheadline').textContent = b.subheadline || '';
+    $('#trust-bar').innerHTML = (b.trustItems || []).map((t) => `<span>${esc(t)}</span>`).join('');
+    $('#wordmark').textContent = b.companyName;
+    if (b.logoUrl) {
+      const img = $('#logo');
+      img.onload = () => { img.hidden = false; $('#wordmark').hidden = true; };
+      img.onerror = () => { img.hidden = true; $('#wordmark').hidden = false; };
+      img.alt = b.companyName; img.src = b.logoUrl;
+    }
+    const tel = 'tel:' + (b.phone || '').replace(/[^\d+]/g, '');
+    $('#head-phone').textContent = b.phone || ''; $('#head-phone').href = tel;
+    $('#phone').textContent = b.phone || ''; $('#phone').href = tel;
+    $('#consent-text').textContent = b.consentText;
+    $('#disclaimer').textContent = b.disclaimer;
+    $('#cta').textContent = b.ctaText; $('#cta').href = b.ctaUrl;
+    $('#fin-wrap').hidden = !cfg.financing;
+    document.title = `Instant Roof Estimate | ${b.companyName}`;
+    $('#materials').innerHTML = cfg.materials.map((m, i) => `
+      <label><input type="radio" name="materialId" value="${esc(m.id)}" ${i === 0 ? 'checked' : ''}>
+      <span class="card"><b>${esc(m.name)}</b><small>${esc(m.description || '')}</small></span></label>`).join('');
+
+    if (cfg.demo) {
+      $('#demo-banner').hidden = false;
+      $('#demo-banner').textContent = state.mode === 'local'
+        ? 'Test mode: running in your browser with a sample roof. Prices use the default formula; nothing is sent anywhere.'
+        : 'Test mode: no Google API key yet, so every address uses a sample roof. Leads are still saved and sent to your CRM.';
+    }
+    const prefill = new URLSearchParams(location.search).get('address');
+    if (prefill) $('#address').value = prefill;
+    show('address');
+  }
+
+  // Step 1 – address
+  const loadingMsgs = ['Locating the property', 'Finding every roof plane', 'Measuring pitch and area'];
+  $('#f-address').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('#err-address').textContent = '';
+    const address = $('#address').value.trim();
+    show('loading');
+    let i = 0; const tick = setInterval(() => { $('#loading-msg').textContent = loadingMsgs[++i % loadingMsgs.length]; }, 700);
+    try {
+      const [d] = await Promise.all([api.measure(address), new Promise((r) => setTimeout(r, 1200))]);
+      state.sessionId = d.sessionId; state.found = d.found; state.roof = d.roof;
+      if (!d.found) { state.confirmed = false; return show('nocoverage'); }
+      $('#confirm-address').textContent = d.address;
+      $('#roof-img').src = d.imageUrl;
+      $('#s-area').textContent = d.roof.totalAreaSqFt.toLocaleString('en-US');
+      $('#s-facets').textContent = d.roof.facets;
+      $('#s-pitch').textContent = d.roof.predominantPitch;
+      const st = document.querySelector(`input[name=stories][value="${Math.min(3, d.roof.estStories || 1)}"]`);
+      if (st) st.checked = true;
+      show('confirm');
+    } catch (err) {
+      show('address');
+      $('#err-address').textContent = err.message;
+    } finally { clearInterval(tick); $('#loading-msg').textContent = loadingMsgs[0]; }
+  });
+
+  // Step 2 – confirm
+  $('#yes-roof').onclick = () => { state.confirmed = true; show('questions'); };
+  $('#no-roof').onclick = () => { state.confirmed = false; show('nocoverage'); };
+  $('#nocov-continue').onclick = () => show('questions');
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-back]'); if (b) show(b.dataset.back); });
+
+  // Step 3 – questions
+  $('#f-questions').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    state.answers = Object.fromEntries(f.entries());
+    state.answers.financing = f.get('financing') === 'on';
+    const manual = !state.found || !state.confirmed;
+    $('#contact-title').textContent = manual ? 'Almost done' : 'Your estimate is ready';
+    $('#contact-sub').textContent = manual ? 'Where should we send your estimate?' : "Enter your details to see your price instantly. We'll email you a copy too.";
+    $('#contact-btn').textContent = manual ? 'Request my estimate →' : 'Show my price →';
+    show('contact');
+  });
+
+  // Step 4 – contact → lead → quote
+  $('#f-contact').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#contact-btn');
+    const f = new FormData(e.target);
+    $('#err-contact').textContent = '';
+    btn.disabled = true;
+    try {
+      const d = await api.lead({
+        sessionId: state.sessionId,
+        confirmed: state.confirmed,
+        answers: state.answers,
+        contact: { firstName: f.get('firstName'), lastName: f.get('lastName'), email: f.get('email'), phone: f.get('phone') },
+        notes: f.get('notes'), website: f.get('website'), consent: f.get('consent') === 'on',
+        utm: utm(), pageUrl: document.referrer || location.href,
+      });
+      renderResult(d);
+      show('result');
+      if (window.parent !== window) window.parent.postMessage({ type: 'roof-quote:lead', quote: d.quote ? { low: d.quote.low, high: d.quote.high } : null }, '*');
+    } catch (err) {
+      $('#err-contact').textContent = err.message;
+    } finally { btn.disabled = false; }
+  });
+
+  function renderResult(d) {
+    const manual = d.needsManualMeasure || !d.quote;
+    $('#result-quote').hidden = manual;
+    $('#result-manual').hidden = !manual;
+    if (d.testLead) {
+      $('#payload').hidden = false; $('#restart').hidden = false;
+      $('#payload-json').textContent = JSON.stringify(d.testLead, null, 2);
+    }
+    if (manual) return;
+    const q = d.quote;
+    $('#r-material').textContent = `Your estimated price · ${q.materialName}`;
+    $('#r-range').textContent = `${money(q.low)} – ${money(q.high)}`;
+    $('#r-monthly').textContent = q.financing ? `or as low as ${money(q.financing.monthlyFrom)}/mo with financing*` : '';
+    $('#r-detail').textContent = `${q.roofSqFt.toLocaleString('en-US')} sq ft of roof · ${q.squares} squares incl. waste · ${q.stories}-story · ${q.layers}-layer tear-off`;
+    const t = $('#r-lines');
+    t.hidden = !q.lines?.length;
+    if (q.lines?.length) t.innerHTML = q.lines.map((l) => `<tr><td>${esc(l.label)}</td><td>${money(l.amount)}</td></tr>`).join('');
+    $('#r-compare').innerHTML = d.comparisons?.length > 1
+      ? '<h3>Compare roof options</h3>' + d.comparisons.map((c) =>
+        `<div class="opt ${c.materialId === q.materialId ? 'sel' : ''}"><span>${esc(c.materialName)}</span><span>${money(c.low)} – ${money(c.high)}</span></div>`).join('')
+      : '';
+    $('#disclaimer').textContent = state.cfg.branding.disclaimer +
+      (q.financing ? ` *Payment example based on ${q.financing.aprPercent}% APR for ${q.financing.termMonths} months on the low estimate, subject to credit approval.` : '');
+  }
+
+  $('#restart').onclick = () => {
+    ['#f-address', '#f-questions'].forEach((s) => $(s).reset());
+    $('#payload').hidden = true; $('#restart').hidden = true;
+    show('address');
+  };
+
+  init().catch((e) => { console.error(e); document.querySelector('.rq-body').innerHTML = '<p>The estimator is temporarily unavailable. Please call us for a quote.</p>'; });
+})();
+
+</script>
+</body>
+</html>
