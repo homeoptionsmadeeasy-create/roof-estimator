@@ -1,0 +1,38 @@
+# Render Blueprint: Dashboard → New → Blueprint → pick this repo.
+# Creates an always-on web service with a 1 GB persistent disk for settings + leads.
+services:
+  - type: web
+    name: roof-estimator
+    runtime: node
+    plan: starter            # paid plan required for a persistent disk; free instances sleep
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    disk:
+      name: estimator-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: /var/data
+      - key: NODE_VERSION
+        value: "22"
+      - key: GEOCODE_COUNTRY
+        value: US
+      - key: CRM_PROVIDERS
+        value: gohighlevel
+      - key: GHL_TAGS
+        value: online-estimate
+      # Secrets: Render asks for these when the Blueprint is created
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: GHL_TOKEN
+        sync: false
+      - key: GHL_LOCATION_ID
+        sync: false
+      - key: GHL_PIPELINE_ID
+        sync: false
+      - key: GHL_STAGE_ID
+        sync: false

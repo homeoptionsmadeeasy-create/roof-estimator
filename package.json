@@ -1,0 +1,22 @@
+{
+  "name": "roof-estimator",
+  "version": "1.0.0",
+  "description": "Instant roof estimate widget using Google Solar API",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "build-demo": "node scripts/build-demo.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.22.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true
+}

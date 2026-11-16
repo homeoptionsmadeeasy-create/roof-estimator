@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roof Estimator Admin</title>
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <header class="top">
+    <strong>Roof Estimator Admin</strong>
+    <nav>
+      <button data-tab="formula" class="on">Pricing formula</button>
+      <button data-tab="branding">Branding &amp; text</button>
+      <button data-tab="leads">Leads</button>
+    </nav>
+    <span id="status" class="status"></span>
+  </header>
+
+  <main>
+    <section class="tab on" id="tab-formula">
+      <div class="split">
+        <div id="formula-form"></div>
+        <aside class="preview">
+          <h3>Live preview</h3>
+          <p class="hint">Updates as you type (before saving). Uses a sample 2,479 sq ft roof, or test a real address:</p>
+          <div class="row"><input id="test-address" placeholder="Test a real address (uses 1 API call)"><button id="test-btn" class="btn ghost">Test</button></div>
+          <div class="row three">
+            <label>Layers <select id="t-layers"><option>1</option><option>2</option><option>3</option><option value="unknown">unknown</option></select></label>
+            <label>Stories <select id="t-stories"><option>1</option><option>2</option><option>3</option></select></label>
+            <label>Skylights <input id="t-sky" type="number" value="0" min="0"></label>
+          </div>
+          <div id="preview-out"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-branding"><div id="branding-form"></div></section>
+
+    <section class="tab" id="tab-leads">
+      <div class="row between"><h2>Leads</h2><a class="btn ghost" href="/api/admin/leads.csv">Download CSV</a></div>
+      <div id="leads"></div>
+    </section>
+  </main>
+
+  <footer class="savebar">
+    <span id="dirty"></span>
+    <button class="btn ghost" id="reset">Reset to defaults</button>
+    <button class="btn" id="save">Save changes</button>
+  </footer>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

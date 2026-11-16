@@ -1,0 +1,248 @@
+{
+  "name": "buildings/mock",
+  "center": {
+    "latitude": 32.7767,
+    "longitude": -96.797
+  },
+  "imageryDate": {
+    "year": 2025,
+    "month": 6,
+    "day": 12
+  },
+  "imageryQuality": "HIGH",
+  "postalCode": "75201",
+  "regionCode": "US",
+  "boundingBox": {
+    "sw": {
+      "latitude": 32.77652,
+      "longitude": -96.7972376
+    },
+    "ne": {
+      "latitude": 32.776807999999996,
+      "longitude": -96.79666519999999
+    }
+  },
+  "solarPotential": {
+    "wholeRoofStats": {
+      "areaMeters2": 230.3
+    },
+    "roofSegmentStats": [
+      {
+        "pitchDegrees": 26.6,
+        "azimuthDegrees": 180,
+        "stats": {
+          "areaMeters2": 62.4,
+          "groundAreaMeters2": 55.8,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776655,
+          "longitude": -96.797
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.77661,
+            "longitude": -96.7971512
+          },
+          "ne": {
+            "latitude": 32.7767,
+            "longitude": -96.79684879999999
+          }
+        },
+        "planeHeightAtCenterMeters": 6.1
+      },
+      {
+        "pitchDegrees": 26.6,
+        "azimuthDegrees": 0,
+        "stats": {
+          "areaMeters2": 61.8,
+          "groundAreaMeters2": 55.26,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776745,
+          "longitude": -96.797
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.7767,
+            "longitude": -96.7971512
+          },
+          "ne": {
+            "latitude": 32.77679,
+            "longitude": -96.79684879999999
+          }
+        },
+        "planeHeightAtCenterMeters": 6.1
+      },
+      {
+        "pitchDegrees": 26.6,
+        "azimuthDegrees": 90,
+        "stats": {
+          "areaMeters2": 24.5,
+          "groundAreaMeters2": 21.91,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.7767,
+          "longitude": -96.7968164
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.77661,
+            "longitude": -96.79684879999999
+          },
+          "ne": {
+            "latitude": 32.77679,
+            "longitude": -96.796784
+          }
+        },
+        "planeHeightAtCenterMeters": 5.9
+      },
+      {
+        "pitchDegrees": 26.6,
+        "azimuthDegrees": 270,
+        "stats": {
+          "areaMeters2": 24.1,
+          "groundAreaMeters2": 21.55,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.7767,
+          "longitude": -96.7971836
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.77661,
+            "longitude": -96.79721599999999
+          },
+          "ne": {
+            "latitude": 32.77679,
+            "longitude": -96.7971512
+          }
+        },
+        "planeHeightAtCenterMeters": 5.9
+      },
+      {
+        "pitchDegrees": 33.7,
+        "azimuthDegrees": 180,
+        "stats": {
+          "areaMeters2": 18.2,
+          "groundAreaMeters2": 15.14,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776574,
+          "longitude": -96.797
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.776537999999995,
+            "longitude": -96.7970648
+          },
+          "ne": {
+            "latitude": 32.77661,
+            "longitude": -96.7969352
+          }
+        },
+        "planeHeightAtCenterMeters": 5.2
+      },
+      {
+        "pitchDegrees": 33.7,
+        "azimuthDegrees": 90,
+        "stats": {
+          "areaMeters2": 7.4,
+          "groundAreaMeters2": 6.16,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776574,
+          "longitude": -96.796919
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.776537999999995,
+            "longitude": -96.7969352
+          },
+          "ne": {
+            "latitude": 32.77661,
+            "longitude": -96.7969028
+          }
+        },
+        "planeHeightAtCenterMeters": 5
+      },
+      {
+        "pitchDegrees": 33.7,
+        "azimuthDegrees": 270,
+        "stats": {
+          "areaMeters2": 7.2,
+          "groundAreaMeters2": 5.99,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776574,
+          "longitude": -96.79708099999999
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.776537999999995,
+            "longitude": -96.7970972
+          },
+          "ne": {
+            "latitude": 32.77661,
+            "longitude": -96.7970648
+          }
+        },
+        "planeHeightAtCenterMeters": 5
+      },
+      {
+        "pitchDegrees": 18.4,
+        "azimuthDegrees": 180,
+        "stats": {
+          "areaMeters2": 21.6,
+          "groundAreaMeters2": 20.5,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776709,
+          "longitude": -96.7967354
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.776664,
+            "longitude": -96.796784
+          },
+          "ne": {
+            "latitude": 32.776754,
+            "longitude": -96.7966868
+          }
+        },
+        "planeHeightAtCenterMeters": 3.4
+      },
+      {
+        "pitchDegrees": 4,
+        "azimuthDegrees": 0,
+        "stats": {
+          "areaMeters2": 3.1,
+          "groundAreaMeters2": 3.09,
+          "sunshineQuantiles": []
+        },
+        "center": {
+          "latitude": 32.776771999999994,
+          "longitude": -96.7967624
+        },
+        "boundingBox": {
+          "sw": {
+            "latitude": 32.776754,
+            "longitude": -96.796784
+          },
+          "ne": {
+            "latitude": 32.77679,
+            "longitude": -96.7967408
+          }
+        },
+        "planeHeightAtCenterMeters": 3
+      }
+    ]
+  }
+}
