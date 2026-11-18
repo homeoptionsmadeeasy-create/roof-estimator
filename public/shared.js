@@ -97,6 +97,7 @@ function monthlyPayment(principal, aprPercent, months) {
  */
 function computeQuote(m, a, cfg, materialIdOverride) {
   const material = cfg.materials.find((x) => x.id === (materialIdOverride || a.materialId)) || cfg.materials.find((x) => x.enabled);
+  if (material.percentOf) return percentQuote(m, a, cfg, material);
   const lines = [];
   const add = (label, amount, detail) => { if (amount) lines.push({ label, amount: round2(amount), detail }); };
 
@@ -185,6 +186,38 @@ function computeQuote(m, a, cfg, materialIdOverride) {
     mid: Math.round(subtotal),
     low, high, rangePercent: rPct,
     financing: fin,
+  };
+}
+
+// Priced as a percentage of another material's full estimate for the same roof
+// (e.g. roof rejuvenation = 50% of an architectural shingle replacement).
+function percentQuote(m, a, cfg, material) {
+  const baseMat = cfg.materials.find((x) => x.id === material.percentOf);
+  if (!baseMat || baseMat.percentOf) throw new Error(`"${material.name}" must be a percentage of a regular per-square material (check its "% of" ID).`);
+  // Treatments don't remove old roofing, so the base is a standard 1-layer job whatever the homeowner picked
+  const base = computeQuote(m, material.noTearOff ? { ...a, layers: '1' } : a, cfg, baseMat.id);
+  const pct = Number(material.percent) || 0;
+  const mid = base.mid * pct / 100;
+  const rPct = cfg.rangePercentByQuality[m.quality] ?? cfg.rangePercentByQuality.UNKNOWN ?? 15;
+  const ro = cfg.roundTo || 1;
+  const low = Math.floor((mid * (1 - rPct / 100)) / ro) * ro;
+  const high = Math.ceil((mid * (1 + rPct / 100)) / ro) * ro;
+  return {
+    materialId: material.id,
+    materialName: material.name,
+    roofSqFt: base.roofSqFt,
+    squares: base.squares,
+    wastePercent: 0,
+    stories: base.stories,
+    layers: material.noTearOff ? 0 : base.layers,
+    noTearOff: !!material.noTearOff,
+    note: material.note || '',
+    lines: [{ label: `${material.name}`, amount: round2(mid), detail: `${pct}% of the ${baseMat.name} replacement price ($${base.mid.toLocaleString('en-US')})` }],
+    mid: Math.round(mid),
+    low, high, rangePercent: rPct,
+    financing: cfg.financing?.enabled
+      ? { monthlyFrom: Math.round(monthlyPayment(low, cfg.financing.aprPercent, cfg.financing.termMonths)), aprPercent: cfg.financing.aprPercent, termMonths: cfg.financing.termMonths }
+      : null,
   };
 }
 
