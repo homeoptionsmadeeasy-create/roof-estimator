@@ -24,7 +24,7 @@
       const c = window.RQ_DEMO_DATA.config;
       return {
         branding: c.branding,
-        materials: c.materials.filter((m) => m.enabled).map(({ id, name, description }) => ({ id, name, description })),
+        materials: c.materials.filter((m) => m.enabled).map(({ id, name, description, noTearOff }) => ({ id, name, description, noTearOff: !!noTearOff })),
         financing: !!c.financing?.enabled, showLineItems: !!c.display?.showLineItems, demo: true,
       };
     },
@@ -58,7 +58,7 @@
         createdAt: new Date().toISOString(), firstName: ct.firstName, lastName: ct.lastName, email: ct.email, phone: ct.phone,
         address: s.address, answers: b.answers, notes: b.notes,
         roof: { totalAreaSqFt: m.totalAreaSqFt, facets: m.facets, predominantPitch: m.predominantPitch, quality: m.quality, imageryDate: m.imageryDate },
-        quote: quote && { low: quote.low, high: quote.high, mid: quote.mid, squares: quote.squares, materialName: quote.materialName, lines: quote.lines },
+        quote: quote && { low: quote.low, high: quote.high, mid: quote.mid, squares: quote.squares, materialId: quote.materialId, materialName: quote.materialName, noTearOff: !!quote.noTearOff, lines: quote.lines },
         needsManualMeasure: !use, utm: b.utm,
       };
       return {
@@ -76,18 +76,21 @@
   };
 
   // ------------------------------------------------------------------
+  let shown = 0;
   function show(step) {
+    shown++;
     document.querySelectorAll('.step').forEach((el) => el.classList.toggle('active', el.dataset.step === step));
     const n = stepNo[step];
     document.querySelectorAll('.rq-steps li').forEach((li) => {
       const i = Number(li.dataset.s);
       li.className = i < n ? 'done' : i === n ? 'now' : '';
     });
-    if (step !== 'address') {
+    if (step !== 'address' && shown > 1) {
       const first = document.querySelector(`.step[data-step="${step}"] h2, .step[data-step="${step}"] button`);
       if (first) { first.setAttribute('tabindex', '-1'); first.focus({ preventScroll: true }); }
     }
-    if (window.parent !== window) document.querySelector('.rq').scrollIntoView({ block: 'nearest' });
+    // Keep the widget in view between steps, but never move the host page on first load
+    if (shown > 1 && window.parent !== window) document.querySelector('.rq').scrollIntoView({ block: 'nearest' });
     resize();
   }
   function resize() {
@@ -141,6 +144,13 @@
         ? 'Test mode: running in your browser with a sample roof. Prices use the default formula; nothing is sent anywhere.'
         : 'Test mode: no Google API key yet, so every address uses a sample roof. Leads are still saved and sent to your CRM.';
     }
+    // ?compact=1 (set by embed.js data-compact) hides the widget's own headline when the host page has one
+    if (new URLSearchParams(location.search).get('compact') === '1') document.documentElement.classList.add('rq-compact');
+    const syncLayers = () => {
+      const sel = cfg.materials.find((m) => m.id === (document.querySelector('input[name=materialId]:checked') || {}).value);
+      $('#fs-layers').hidden = !!sel?.noTearOff;
+    };
+    $('#materials').addEventListener('change', syncLayers); syncLayers();
     const prefill = new URLSearchParams(location.search).get('address');
     if (prefill) $('#address').value = prefill;
     show('address');
@@ -186,7 +196,7 @@
     state.answers.financing = f.get('financing') === 'on';
     const manual = !state.found || !state.confirmed;
     $('#contact-title').textContent = manual ? 'Almost done' : 'Your estimate is ready';
-    $('#contact-sub').textContent = manual ? 'Where should we send your estimate?' : "Enter your details to see your price instantly. We'll email you a copy too.";
+    $('#contact-sub').textContent = manual ? 'Where should we send your estimate?' : "Enter your details to see your price instantly.";
     $('#contact-btn').textContent = manual ? 'Request my estimate →' : 'Show my price →';
     show('contact');
   });
@@ -228,7 +238,10 @@
     $('#r-material').textContent = `Your estimated price · ${q.materialName}`;
     $('#r-range').textContent = `${money(q.low)} – ${money(q.high)}`;
     $('#r-monthly').textContent = q.financing ? `or as low as ${money(q.financing.monthlyFrom)}/mo with financing*` : '';
-    $('#r-detail').textContent = `${q.roofSqFt.toLocaleString('en-US')} sq ft of roof · ${q.squares} squares incl. waste · ${q.stories}-story · ${q.layers}-layer tear-off`;
+    $('#r-detail').textContent = q.noTearOff
+      ? `${q.roofSqFt.toLocaleString('en-US')} sq ft of roof · ${q.stories}-story · treatment of your existing shingles, no tear-off`
+      : `${q.roofSqFt.toLocaleString('en-US')} sq ft of roof · ${q.squares} squares incl. waste · ${q.stories}-story · ${q.layers}-layer tear-off`;
+    $('#r-note').hidden = !q.note; $('#r-note').textContent = q.note || '';
     const t = $('#r-lines');
     t.hidden = !q.lines?.length;
     if (q.lines?.length) t.innerHTML = q.lines.map((l) => `<tr><td>${esc(l.label)}</td><td>${money(l.amount)}</td></tr>`).join('');

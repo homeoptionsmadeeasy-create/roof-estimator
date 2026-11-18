@@ -36,6 +36,10 @@ h2 { font: 700 1.45rem/1.2 var(--serif); letter-spacing: -.01em; margin: 0 0 4px
 .lede { color: var(--ink-2); margin: 0 0 20px; max-width: 58ch; }
 .muted { color: var(--muted); margin: 0 0 16px; }
 
+/* compact mode (embedded under a page that already has a headline) */
+.rq-compact .rq-head .brand, .rq-compact .rq-head h1, .rq-compact .rq-head .lede { display: none; }
+.rq-compact .rq-body { padding-top: 22px; }
+
 /* step indicator */
 .rq-steps { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0; margin: 0 0 26px; counter-reset: s; }
 .rq-steps li { counter-increment: s; font-size: .76rem; font-weight: 600; color: var(--muted); padding-top: 9px; border-top: 4px solid var(--line); transition: border-color .25s, color .25s; }
@@ -114,6 +118,7 @@ legend { font-weight: 700; font-size: .95rem; margin-bottom: 10px; color: var(--
 .privacy { text-align: center; font-size: .8rem; color: var(--muted); margin: 10px 0 0; }
 
 /* result */
+.r-note { margin: 12px 0 0; padding: 12px 14px; background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid var(--brand); border-radius: var(--r); font-size: .88rem; color: var(--ink-2); line-height: 1.55; }
 .price-card { background: var(--accent); color: #fff; border-radius: var(--rl); padding: 22px 24px; position: relative; overflow: hidden; }
 .price-card::after { content: ""; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%; background: rgba(255,255,255,.05); }
 .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .74rem; color: #bbf7d0; margin: 0; font-weight: 700; }

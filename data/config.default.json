@@ -10,7 +10,11 @@
     "headline": "Your real roof price,",
     "headlineAccent": "in 60 seconds",
     "subheadline": "We measure your actual roof from satellite imagery and price it the same way our estimators do. No sales call required.",
-    "trustItems": ["Licensed & Insured", "USMC Veteran Founded", "Serving St. Louis Since 2008"],
+    "trustItems": [
+      "Licensed & Insured",
+      "USMC Veteran Founded",
+      "Serving St. Louis Since 2008"
+    ],
     "consentText": "By submitting, I agree to be contacted by phone, text, or email about my estimate. Consent is not a condition of purchase. Msg & data rates may apply.",
     "disclaimer": "This estimate is based on satellite measurements and the answers you provided. Your final price is confirmed after a free on-site inspection (decking, ventilation, and flashing condition can't be seen from above)."
   },
@@ -21,13 +25,42 @@
     "maxDistanceFromAddressM": 40
   },
   "materials": [
-    { "id": "arch-shingle", "name": "Architectural Shingles", "description": "The most popular choice. 30-year+ dimensional shingles.", "pricePerSquare": 475, "enabled": true },
-    { "id": "designer-shingle", "name": "Designer / Impact-Resistant Shingles", "description": "Class 4 impact rating; may lower insurance premiums.", "pricePerSquare": 625, "enabled": true },
-    { "id": "standing-seam", "name": "Standing Seam Metal", "description": "50+ year lifespan, energy efficient, premium look.", "pricePerSquare": 1250, "enabled": true }
+    {
+      "id": "arch-shingle",
+      "name": "Architectural Shingles",
+      "description": "The most popular choice. 30-year+ dimensional shingles.",
+      "pricePerSquare": 390,
+      "enabled": true
+    },
+    {
+      "id": "designer-shingle",
+      "name": "Designer / Impact-Resistant Shingles",
+      "description": "Class 4 impact rating; may lower insurance premiums.",
+      "pricePerSquare": 450,
+      "enabled": true
+    },
+    {
+      "id": "standing-seam",
+      "name": "Standing Seam Metal",
+      "description": "50+ year lifespan, energy efficient, premium look.",
+      "pricePerSquare": 1000,
+      "enabled": true
+    },
+    {
+      "id": "rejuvenation",
+      "name": "Roof Rejuvenation",
+      "description": "Keep your current shingles. A treatment that restores flexibility to aging but sound asphalt shingles, typically adding 5–10 years. No tear-off.",
+      "pricePerSquare": 0,
+      "percentOf": "arch-shingle",
+      "percent": 50,
+      "noTearOff": true,
+      "note": "Rejuvenation is only for asphalt roofs that are aging but still sound: no active leaks, hail fractures, widespread cracking or soft decking. We confirm your roof is a good candidate and check your shingle warranty at a free inspection. If it needs replacing instead, we will tell you.",
+      "enabled": true
+    }
   ],
   "lowSlope": {
     "maxRise": 2,
-    "pricePerSquare": 700,
+    "pricePerSquare": 650,
     "label": "Low-slope / flat section (modified bitumen or TPO)"
   },
   "waste": {
@@ -37,8 +70,16 @@
     "maxPercent": 20
   },
   "steepPitch": [
-    { "minRise": 8, "extraPerSquare": 45, "label": "Steep pitch (8/12 to 10/12)" },
-    { "minRise": 10, "extraPerSquare": 95, "label": "Very steep pitch (10/12+)" }
+    {
+      "minRise": 8,
+      "extraPerSquare": 45,
+      "label": "Steep pitch (8/12 to 10/12)"
+    },
+    {
+      "minRise": 10,
+      "extraPerSquare": 95,
+      "label": "Very steep pitch (10/12+)"
+    }
   ],
   "stories": {
     "1": 0,
@@ -46,7 +87,7 @@
     "3": 45
   },
   "tearOff": {
-    "perSquarePerLayer": 65,
+    "perSquarePerLayer": 50,
     "assumeLayersIfUnknown": 1
   },
   "extras": {
@@ -54,7 +95,10 @@
     "perChimney": 375
   },
   "flatFees": [
-    { "label": "Permit, dumpster & disposal", "amount": 650 }
+    {
+      "label": "Permit, dumpster & disposal",
+      "amount": 650
+    }
   ],
   "complexity": {
     "facetThreshold": 12,

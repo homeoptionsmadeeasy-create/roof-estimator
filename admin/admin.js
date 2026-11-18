@@ -13,8 +13,8 @@
   const sel = (path, label, options, help) => ({ type: 'select', path, label, options, help });
 
   const FORMULA = [
-    { title: 'Roof materials', hint: 'Installed price per square (100 sq ft) for each option homeowners can pick. Include labor, underlayment, ice & water, drip edge, ridge, etc.', table: 'materials',
-      cols: [['enabled', 'On', 'checkbox'], ['name', 'Name', 'text'], ['description', 'Description', 'text'], ['pricePerSquare', '$ / square', 'number'], ['id', 'ID', 'text']],
+    { title: 'Roof materials & services', hint: 'Installed price per square (100 sq ft) for each option homeowners can pick. Include labor, underlayment, ice & water, drip edge, ridge, etc. To price an option as a percentage of another one (like roof rejuvenation at 50% of architectural), fill in "% of ID" and "%" and the $/square is ignored. "No tear-off" hides the layers question and leaves tear-off out. "Result note" shows under the price.', table: 'materials',
+      cols: [['enabled', 'On', 'checkbox'], ['name', 'Name', 'text'], ['description', 'Description', 'text'], ['pricePerSquare', '$ / square', 'number'], ['percentOf', '% of ID', 'text'], ['percent', '%', 'number'], ['noTearOff', 'No tear-off', 'checkbox'], ['note', 'Result note', 'text'], ['id', 'ID', 'text']],
       blank: () => ({ id: 'mat-' + Date.now().toString(36), name: 'New material', description: '', pricePerSquare: 500, enabled: true }) },
     { title: 'Low-slope sections', hint: 'Roof planes flatter than this pitch are priced separately (they can\'t take shingles).', fields: [
       num('lowSlope.maxRise', 'Below pitch (rise/12)'), num('lowSlope.pricePerSquare', '$ / square'), txt('lowSlope.label', 'Line item label')] },
@@ -64,12 +64,14 @@
   }
   function tableHtml(sec) {
     const rows = get(cfg, sec.table) || [];
-    return `<table class="edit"><tr>${sec.cols.map((c) => `<th>${c[1]}</th>`).join('')}<th></th></tr>` +
+    const minW = { name: 170, description: 260, note: 260, id: 130, percentOf: 130, label: 220 };
+    const w = (k, t) => (t === 'checkbox' ? '' : `style="min-width:${minW[k] || 90}px"`);
+    return `<div style="overflow-x:auto"><table class="edit"><tr>${sec.cols.map((c) => `<th>${c[1]}</th>`).join('')}<th></th></tr>` +
       rows.map((r, i) => `<tr>${sec.cols.map(([k, , t]) => `<td>${t === 'checkbox'
         ? `<input type="checkbox" data-path="${sec.table}.${i}.${k}" ${r[k] ? 'checked' : ''}>`
-        : `<input type="${t}" step="any" data-num="${t === 'number' ? 1 : ''}" data-path="${sec.table}.${i}.${k}" value="${esc(r[k])}">`}</td>`).join('')}
+        : `<input type="${t}" step="any" ${w(k, t)} data-num="${t === 'number' ? 1 : ''}" data-path="${sec.table}.${i}.${k}" value="${esc(r[k])}" title="${esc(r[k])}">`}</td>`).join('')}
         <td><button class="x" title="Remove" data-remove="${sec.table}" data-i="${i}">×</button></td></tr>`).join('') +
-      `</table><button class="btn ghost small add" data-add="${sec.table}">+ Add row</button>`;
+      `</table></div><button class="btn ghost small add" data-add="${sec.table}">+ Add row</button>`;
   }
   function render(target, sections) {
     $(target).innerHTML = sections.map((s, si) => `<div class="card" data-sec="${si}"><h3>${s.title}</h3>${s.hint ? `<p class="hint">${s.hint}</p>` : ''}

@@ -7,7 +7,9 @@
   var target = document.getElementById('roof-quote') || script.parentNode;
   var iframe = document.createElement('iframe');
   // Pass UTM / ad click params from the host page through to the lead
-  iframe.src = origin + '/' + location.search;
+  var qs = new URLSearchParams(location.search);
+  if (script.hasAttribute('data-compact')) qs.set('compact', '1');
+  iframe.src = origin + '/' + (qs.toString() ? '?' + qs.toString() : '');
   iframe.title = 'Instant roof estimate';
   iframe.style.cssText = 'width:100%;border:0;min-height:520px;display:block;overflow:hidden';
   iframe.setAttribute('scrolling', 'no');

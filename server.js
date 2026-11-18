@@ -11,6 +11,9 @@ const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '200kb' }));
 
+// Health check for the hosting platform
+app.get('/healthz', (req, res) => res.json({ ok: true, demo: solar.isMock(), crm: crm.enabledProviders() }));
+
 // ---------- tiny rate limiter (per IP, per bucket) ----------
 const hits = new Map();
 function limit(bucket, max, windowMs) {
@@ -28,7 +31,7 @@ app.get('/api/public-config', (req, res) => {
   const c = store.getConfig();
   res.json({
     branding: c.branding,
-    materials: c.materials.filter((m) => m.enabled).map(({ id, name, description }) => ({ id, name, description })),
+    materials: c.materials.filter((m) => m.enabled).map(({ id, name, description, noTearOff }) => ({ id, name, description, noTearOff: !!noTearOff })),
     financing: !!c.financing?.enabled,
     showLineItems: !!c.display?.showLineItems,
     demo: solar.isMock(),
@@ -130,7 +133,7 @@ app.post('/api/lead', limit('lead', 8, 3600e3), async (req, res) => {
     answers,
     notes: clean(b.notes, 1000),
     roof: m ? { totalAreaSqFt: m.totalAreaSqFt, facets: m.facets, predominantPitch: m.predominantPitch, quality: m.quality, imageryDate: m.imageryDate } : null,
-    quote: quote && { low: quote.low, high: quote.high, mid: quote.mid, squares: quote.squares, materialName: quote.materialName, lines: quote.lines },
+    quote: quote && { low: quote.low, high: quote.high, mid: quote.mid, squares: quote.squares, materialId: quote.materialId, materialName: quote.materialName, noTearOff: !!quote.noTearOff, lines: quote.lines },
     homeownerConfirmedRoof: m ? b.confirmed !== false : null,
     needsManualMeasure: !useSatellite,
     source: clean(b.source, 60) || 'Website roof estimator',
